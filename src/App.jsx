@@ -113,6 +113,17 @@ function useInterval(fn, ms) {
   }, [ms]);
 }
 
+// ── Mobile detection hook (defined early — used by every page) ──────────────
+function useIsMobile() {
+  const [isMobile, setIsMobile] = useState(() => typeof window !== "undefined" && window.innerWidth < 768);
+  useEffect(() => {
+    const handler = () => setIsMobile(window.innerWidth < 768);
+    window.addEventListener("resize", handler);
+    return () => window.removeEventListener("resize", handler);
+  }, []);
+  return isMobile;
+}
+
 // ════════════════════════════════════════════════════════════════════════════
 //  UI PRIMITIVES
 // ════════════════════════════════════════════════════════════════════════════
@@ -350,6 +361,7 @@ function KeyProbs({ probs, home, away }) {
 //  PAGE: LIVE
 // ════════════════════════════════════════════════════════════════════════════
 function LivePage() {
+  const isMobile = useIsMobile();
   const [matches, setMatches]     = useState([]);
   const [selected, setSelected]   = useState(null);
   const [liveData, setLiveData]   = useState(null);
@@ -394,7 +406,7 @@ function LivePage() {
   };
 
   return (
-    <div style={{ display:"grid", gridTemplateColumns:"300px 1fr", gap:20, alignItems:"start" }}>
+    <div style={{ display:"grid", gridTemplateColumns: isMobile ? "1fr" : "300px 1fr", gap:20, alignItems:"start" }}>
       {/* Match list */}
       <div>
         <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:14 }}>
@@ -460,7 +472,7 @@ function LivePage() {
               </div>
             )}
             {/* Lambda cards */}
-            <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr 1fr", gap:12 }}>
+            <div style={{ display:"grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr 1fr", gap:12 }}>
               <LambdaCard label={selected.home?.name} value={liveData.lambdas?.home}
                 color={C.home} sub={`Proj: ${num(liveData.projected_final?.home,1)}`}/>
               <LambdaCard label="Total" value={liveData.lambdas?.total}
@@ -515,6 +527,7 @@ function LivePage() {
 //  PAGE: ANALYZE
 // ════════════════════════════════════════════════════════════════════════════
 function AnalyzePage() {
+  const isMobile = useIsMobile();
   const [leagues, setLeagues]     = useState([]);
   const [leagueId, setLeagueId]   = useState(71);
   const [homeName, setHomeName]   = useState("Flamengo");
@@ -641,7 +654,7 @@ function AnalyzePage() {
 
           {tab==="overview" && (
             <div style={{ display:"flex", flexDirection:"column", gap:16 }}>
-              <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr 1fr", gap:14 }}>
+              <div style={{ display:"grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr 1fr", gap:14 }}>
                 <LambdaCard label={homeName} value={result.lambdas?.home} color={C.home}
                   ci={result.confidence_intervals?.home} mode={result.modes?.home}/>
                 <LambdaCard label="Total" value={result.lambdas?.total} color={C.total}
@@ -758,6 +771,7 @@ function AnalyzePage() {
 //  PAGE: TICKET
 // ════════════════════════════════════════════════════════════════════════════
 function TicketPage() {
+  const isMobile = useIsMobile();
   const [image, setImage]     = useState(null);
   const [preview, setPreview] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -792,8 +806,7 @@ function TicketPage() {
   const RC = { BAIXO:C.success, MÉDIO:C.warn, ALTO:C.error };
 
   return (
-    <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:20, alignItems:"start" }}>
-      {/* Left — Upload */}
+    <div style={{ display:"grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr", gap:20, alignItems:"start" }}>
       <div style={{ display:"flex", flexDirection:"column", gap:14 }}>
         <div
           onDragOver={e=>e.preventDefault()}
@@ -943,6 +956,7 @@ function TicketPage() {
 //  PAGE: LEAGUES
 // ════════════════════════════════════════════════════════════════════════════
 function LeaguesPage() {
+  const isMobile = useIsMobile();
   const [leagues, setLeagues]   = useState([]);
   const [tier, setTier]         = useState("");
   const [selected, setSelected] = useState(null);
@@ -966,7 +980,7 @@ function LeaguesPage() {
   ];
 
   return (
-    <div style={{ display:"grid", gridTemplateColumns:"240px 1fr", gap:20 }}>
+    <div style={{ display:"grid", gridTemplateColumns: isMobile ? "1fr" : "240px 1fr", gap:20 }}>
       <div>
         <SLabel>Região</SLabel>
         <div style={{ display:"flex", flexDirection:"column", gap:4, marginBottom:20 }}>
@@ -1291,6 +1305,7 @@ function UnderstatPage() {
 //  PAGE: STATSBOMB
 // ════════════════════════════════════════════════════════════════════════════
 function StatsBombPage() {
+  const isMobile = useIsMobile();
   const [comps, setComps]         = useState([]);
   const [selected, setSelected]   = useState(null);
   const [matches, setMatches]     = useState([]);
@@ -1307,7 +1322,7 @@ function StatsBombPage() {
   };
 
   return (
-    <div style={{ display:"grid", gridTemplateColumns:"260px 1fr", gap:20 }}>
+    <div style={{ display:"grid", gridTemplateColumns: isMobile ? "1fr" : "260px 1fr", gap:20 }}>
       <div>
         <SLabel>StatsBomb Open Data · Gratuito · GitHub</SLabel>
         {err&&<ErrBox msg={err}/>}
@@ -1363,6 +1378,7 @@ function StatsBombPage() {
 //  PAGE: CALIBRATION
 // ════════════════════════════════════════════════════════════════════════════
 function CalibrationPage() {
+  const isMobile = useIsMobile();
   const [leagueId, setLeagueId]     = useState(71);
   const [homeName, setHomeName]     = useState("");
   const [awayName, setAwayName]     = useState("");
@@ -1410,7 +1426,7 @@ function CalibrationPage() {
           Informe os resultados reais após os jogos. Com 8+ partidas registradas, os pesos do ensemble se adaptam automaticamente.
         </p>
       </div>
-      <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:20 }}>
+      <div style={{ display:"grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr", gap:20 }}>
         <div style={{ display:"flex", flexDirection:"column", gap:14 }}>
           <Card>
             <SLabel>Liga</SLabel>
@@ -1655,21 +1671,24 @@ export default function App() {
   const [health, setHealth]       = useState(null);
   const [hasKey, setHasKey]       = useState(!!loadKeys().football);
   const [liveCount, setLiveCount] = useState(0);
+  const isMobile                  = useIsMobile();
 
   useEffect(() => {
     api.health().then(setHealth).catch(()=>{});
-    // Check live count
     api.liveAll().then(d=>setLiveCount((d.matches||[]).length)).catch(()=>{});
   }, []);
 
   useEffect(() => { setHasKey(!!loadKeys().football); }, [page]);
 
-  const sidebarW = sidebarOpen ? 220 : 64;
+  // On mobile: no sidebar. On desktop: sidebar with toggle.
+  const showSidebar = !isMobile;
+  const sidebarW    = !showSidebar ? 0 : sidebarOpen ? 220 : 64;
 
   return (
     <div style={{ display:"flex", minHeight:"100vh", background:C.bg, color:C.text, fontFamily:body }}>
 
-      {/* ── SIDEBAR (desktop) ─────────────────────────────────────────────── */}
+      {/* ── SIDEBAR (desktop only) ────────────────────────────────────────── */}
+      {showSidebar && (
       <div style={{
         width:sidebarW, minHeight:"100vh", background:C.sidebar,
         borderRight:`1px solid ${C.border}`,
@@ -1750,22 +1769,26 @@ export default function App() {
           </button>
         </div>
       </div>
+      )} {/* end showSidebar */}
 
       {/* ── MAIN CONTENT ──────────────────────────────────────────────────── */}
       <div style={{
-        marginLeft:sidebarW, flex:1, transition:"margin-left 0.2s cubic-bezier(.4,0,.2,1)",
-        paddingBottom:70, // space for mobile bottom nav
+        marginLeft:sidebarW,
+        flex:1,
+        minWidth:0,
+        transition:"margin-left 0.2s cubic-bezier(.4,0,.2,1)",
+        paddingBottom: isMobile ? 80 : 40,
       }}>
         {/* Top bar */}
         <div style={{
           position:"sticky", top:0, zIndex:50,
           background:`${C.bg}f0`, backdropFilter:"blur(12px)",
           borderBottom:`1px solid ${C.border}`,
-          padding:"14px 28px",
+          padding: isMobile ? "12px 16px" : "14px 28px",
           display:"flex", alignItems:"center", justifyContent:"space-between",
         }}>
           <div>
-            <h1 style={{ fontSize:18, fontWeight:800, fontFamily:display, color:C.text, margin:0 }}>
+            <h1 style={{ fontSize: isMobile ? 16 : 18, fontWeight:800, fontFamily:display, color:C.text, margin:0 }}>
               {NAV.find(n=>n.id===page)?.icon} {NAV.find(n=>n.id===page)?.label}
             </h1>
           </div>
@@ -1775,7 +1798,7 @@ export default function App() {
                 style={{ fontSize:11, color:C.warn, background:`${C.warn}12`,
                   border:`1px solid ${C.warn}30`, borderRadius:8, padding:"5px 12px",
                   cursor:"pointer", fontFamily:mono }}>
-                ⚠ Configurar API Key
+                ⚠ {isMobile ? "Config" : "Configurar API Key"}
               </button>
             )}
             {liveCount>0 && <Badge color={C.live}>{liveCount} ao vivo</Badge>}
@@ -1783,7 +1806,7 @@ export default function App() {
         </div>
 
         {/* Page content */}
-        <div style={{ padding:"28px" }}>
+        <div style={{ padding: isMobile ? "16px 14px" : "28px" }}>
           {page==="live"        && <LivePage/>}
           {page==="analyze"     && <AnalyzePage/>}
           {page==="ticket"      && <TicketPage/>}
@@ -1796,59 +1819,56 @@ export default function App() {
         </div>
       </div>
 
-      {/* ── MOBILE BOTTOM NAV ────────────────────────────────────────────── */}
+      {/* ── MOBILE BOTTOM NAV (JS controlled — reliable) ─────────────────── */}
+      {isMobile && (
       <div style={{
         position:"fixed", bottom:0, left:0, right:0, zIndex:200,
-        background:`${C.sidebar}f8`, backdropFilter:"blur(16px)",
+        background:`${C.sidebar}fc`, backdropFilter:"blur(20px)",
         borderTop:`1px solid ${C.border}`,
         display:"flex", justifyContent:"space-around", alignItems:"center",
-        padding:"8px 0 max(8px, env(safe-area-inset-bottom))",
-      }}
-        className="mobile-bottom-nav">
+        paddingTop:8,
+        paddingBottom:`max(10px, env(safe-area-inset-bottom))`,
+      }}>
         {BOTTOM_NAV.map(id => {
           const n = NAV.find(x=>x.id===id);
           const active = page===id;
           return (
             <button key={id} onClick={()=>setPage(id)}
               style={{
-                display:"flex", flexDirection:"column", alignItems:"center", gap:3,
-                padding:"6px 12px", border:"none", background:"transparent", cursor:"pointer",
-                flex:1, position:"relative",
+                display:"flex", flexDirection:"column", alignItems:"center", gap:2,
+                padding:"6px 8px", border:"none", background:"transparent", cursor:"pointer",
+                flex:1, position:"relative", minWidth:0,
               }}>
-              <span style={{ fontSize:22, filter:active?"none":"grayscale(0.5)", opacity:active?1:0.6 }}>{n?.icon}</span>
-              <span style={{ fontSize:9, color:active?C.accent:C.dim, fontFamily:mono, letterSpacing:0.5, fontWeight:active?700:400 }}>
+              {active && <div style={{ position:"absolute", top:-1, left:"50%", transform:"translateX(-50%)", width:24, height:3, background:C.accent, borderRadius:2 }}/>}
+              <span style={{ fontSize:24, lineHeight:1 }}>{n?.icon}</span>
+              <span style={{ fontSize:10, color:active?C.accent:C.dim, fontFamily:mono, fontWeight:active?700:400, marginTop:2 }}>
                 {n?.short}
               </span>
-              {active && <div style={{ position:"absolute", top:0, left:"50%", transform:"translateX(-50%)", width:20, height:2, background:C.accent, borderRadius:2 }}/>}
               {id==="live" && liveCount>0 && (
-                <div style={{ position:"absolute", top:4, right:"calc(50% - 14px)", width:8, height:8, borderRadius:"50%", background:C.live }}/>
+                <div style={{ position:"absolute", top:4, right:"calc(50% - 16px)", width:8, height:8, borderRadius:"50%", background:C.live, border:`2px solid ${C.bg}` }}/>
               )}
             </button>
           );
         })}
       </div>
+      )}
 
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700;800;900&family=IBM+Plex+Mono:wght@400;700&family=Inter:wght@400;500;600;700&display=swap');
         * { box-sizing:border-box; margin:0; padding:0; }
         @keyframes livePulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.6;transform:scale(1.4)} }
         @keyframes spin { to{transform:rotate(360deg)} }
-        ::-webkit-scrollbar { width:5px; height:5px; }
+        ::-webkit-scrollbar { width:4px; height:4px; }
         ::-webkit-scrollbar-track { background:${C.bg}; }
         ::-webkit-scrollbar-thumb { background:${C.border}; border-radius:3px; }
-        button:hover:not(:disabled) { opacity:0.88; }
+        button:hover:not(:disabled) { opacity:0.85; }
         input, select { color-scheme:dark; }
         input::placeholder { color:${C.dim}; }
-        /* Hide sidebar on mobile, show bottom nav */
         @media (max-width: 768px) {
-          .mobile-bottom-nav { display:flex !important; }
-          [style*="position:fixed"][style*="left:0"][style*="top:0"][style*="zIndex:100"] { display:none !important; }
-          [style*="marginLeft"] { margin-left:0 !important; }
-          [style*="padding:28px"] { padding:16px !important; }
+          .rg-2 { grid-template-columns: 1fr !important; }
+          .rg-3 { grid-template-columns: 1fr 1fr !important; }
         }
-        @media (min-width: 769px) {
-          .mobile-bottom-nav { display:none !important; }
-        }
+
       `}</style>
     </div>
   );
